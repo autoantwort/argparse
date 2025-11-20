@@ -74,6 +74,11 @@ SOFTWARE.
 
 namespace argparse {
 
+constexpr int radix_2 = 2;
+constexpr int radix_8 = 8;
+constexpr int radix_10 = 10;
+constexpr int radix_16 = 16;
+
 namespace details { // namespace for helper methods
 
 template <typename T, typename = void>
@@ -144,8 +149,6 @@ template <typename T> std::string repr(T const &val) {
   }
 }
 
-namespace {
-
 template <typename T> constexpr bool standard_signed_integer = false;
 template <> constexpr bool standard_signed_integer<signed char> = true;
 template <> constexpr bool standard_signed_integer<short int> = true;
@@ -161,12 +164,6 @@ template <> constexpr bool standard_unsigned_integer<unsigned long int> = true;
 template <>
 constexpr bool standard_unsigned_integer<unsigned long long int> = true;
 
-} // namespace
-
-constexpr int radix_2 = 2;
-constexpr int radix_8 = 8;
-constexpr int radix_10 = 10;
-constexpr int radix_16 = 16;
 
 template <typename T>
 constexpr bool standard_integer =
@@ -358,15 +355,11 @@ template <class T> struct parse_number<T> {
   }
 };
 
-namespace {
-
 template <class T> inline const auto generic_strtod = nullptr;
 template <> inline const auto generic_strtod<float> = ARGPARSE_CUSTOM_STRTOF;
 template <> inline const auto generic_strtod<double> = ARGPARSE_CUSTOM_STRTOD;
 template <>
 inline const auto generic_strtod<long double> = ARGPARSE_CUSTOM_STRTOLD;
-
-} // namespace
 
 template <class T> inline auto do_strtod(std::string const &s) -> T {
   if (isspace(static_cast<unsigned char>(s[0])) || s[0] == '+') {
