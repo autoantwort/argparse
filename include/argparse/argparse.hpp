@@ -74,11 +74,6 @@ SOFTWARE.
 
 namespace argparse {
 
-constexpr int radix_2 = 2;
-constexpr int radix_8 = 8;
-constexpr int radix_10 = 10;
-constexpr int radix_16 = 16;
-
 namespace details { // namespace for helper methods
 
 template <typename T, typename = void>
@@ -164,6 +159,10 @@ template <> constexpr bool standard_unsigned_integer<unsigned long int> = true;
 template <>
 constexpr bool standard_unsigned_integer<unsigned long long int> = true;
 
+constexpr int radix_2 = 2;
+constexpr int radix_8 = 8;
+constexpr int radix_10 = 10;
+constexpr int radix_16 = 16;
 
 template <typename T>
 constexpr bool standard_integer =
