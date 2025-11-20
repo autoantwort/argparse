@@ -6,6 +6,12 @@ else()
   set(ARGPARSE_IS_TOP_LEVEL OFF)
 endif()
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "4.0.0")
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444") # 4.0.3
+else()
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508") # 3.31.0
+endif()
+
 project(argparse
         VERSION 3.2.0 
         DESCRIPTION "A single header argument parser for C++17"
@@ -16,6 +22,8 @@ project(argparse
 option(ARGPARSE_INSTALL "Include an install target" ${ARGPARSE_IS_TOP_LEVEL})
 option(ARGPARSE_BUILD_TESTS "Build tests" ${ARGPARSE_IS_TOP_LEVEL})
 option(ARGPARSE_BUILD_SAMPLES "Build samples" OFF)
+option(ARGPARSE_EXPORT_MODULE "Exports an c++20 module" OFF)
+option(ARGPARSE_USE_IMPORT_STD "Use import std;" ON)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -35,9 +43,25 @@ endif()
 if(ARGPARSE_BUILD_TESTS)
   add_subdirectory(test)
 endif()
+
+if (ARGPARSE_EXPORT_MODULE)
+  add_library(argparse-modules)
+  add_library(argparse::argparse-modules ALIAS argparse-modules)
+  target_link_libraries(argparse-modules PRIVATE argparse)
+  target_compile_features(argparse-modules PUBLIC cxx_std_20)
+  target_sources(argparse-modules PUBLIC FILE_SET CXX_MODULES FILES module/argparse.cppm)
+  if (ARGPARSE_USE_IMPORT_STD)
+    target_compile_definitions(argparse-modules PRIVATE ARGPARSE_MODULE_USE_STD_MODULE)
+    set_target_properties(argparse-modules PROPERTIES CXX_MODULE_STD ON)
+    target_compile_features(argparse-modules PRIVATE cxx_std_23)
+  endif()
+endif()
   
 if(ARGPARSE_INSTALL)
   install(TARGETS argparse EXPORT argparseConfig)
+  if (ARGPARSE_EXPORT_MODULE)
+    install(TARGETS argparse-modules EXPORT argparseConfig FILE_SET CXX_MODULES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/modules")
+  endif()
   install(EXPORT argparseConfig
           NAMESPACE argparse::
           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
